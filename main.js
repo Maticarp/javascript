@@ -1,34 +1,91 @@
-let nombre = prompt("Ingrese su nombre");
-alert("Hola " + nombre);
 
-function verificarCredenciales(usuario, contrasena) {
-    const usuariosValidos = {
-        'maticarp': '12345'
-    };
-
-    return usuariosValidos[usuario] === contrasena;
+function Producto(nombre, precio) {
+    this.nombre = nombre;
+    this.precio = precio;
 }
 
-function iniciarSesion() {
-    let intentos = 5;
 
-    while (intentos > 0) {
-        const usuario = prompt('Ingrese su usuario:');
-        const contrasena = prompt('Ingrese su contraseña:');
+const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+let total = parseFloat(localStorage.getItem('total')) || 0;
 
-        if (verificarCredenciales(usuario, contrasena)) {
-            alert('Inicio de sesión exitoso. Bienvenido, ' + usuario + '!');
-            return;
-        } else {
-            intentos--;
-            alert(`Credenciales incorrectas. Intentos restantes: ${intentos}`);
-        }
+function agregarProducto() {
+    const nombre = document.getElementById("producto").value;
+    const precio = parseFloat(document.getElementById("precio").value);
+
+    if (validarEntradas(nombre, precio)) {
+        const producto = new Producto(nombre, precio);
+        carrito.push(producto);
+
+        total += precio;
+
+        actualizarCarrito();
+        limpiarEntradas();
+        actualizarTotal();
+        guardarEnLocalStorage();
     }
-
-    alert('Se han agotado los intentos. Por favor, inténtelo más tarde.');
 }
 
-iniciarSesion();
+function vaciarCarrito() {
+    carrito.length = 0;
+    total = 0;
+    actualizarCarrito();
+    actualizarTotal();
+    guardarEnLocalStorage();
+}
+
+function actualizarCarrito() {
+    const listaProductos = document.getElementById("listaProductos");
+    listaProductos.innerHTML = "";
+
+    carrito.forEach(function (producto, index) {
+        const li = document.createElement("li");
+        li.textContent = `${producto.nombre} - $${producto.precio.toFixed(2)}`;
+        listaProductos.appendChild(li);
+    });
+}
+
+
+function validarEntradas(nombre, precio) {
+    const mensajeError = document.getElementById("mensajeError");
+
+    if (nombre && !isNaN(precio) && precio > 0) {
+        mensajeError.style.display = "none";
+        return true;
+    } else {
+        mensajeError.textContent = "Por favor, ingresa un nombre y un precio válido.";
+        mensajeError.style.display = "block";
+        return false;
+    }
+}
+
+function limpiarEntradas() {
+    document.getElementById("producto").value = "";
+    document.getElementById("precio").value = "";
+}
+
+function actualizarTotal() {
+    document.getElementById("total").textContent = "Total: $" + total.toFixed(2);
+}
+
+function guardarEnLocalStorage() {
+    localStorage.setItem('carrito', JSON.stringify(carrito));
+    localStorage.setItem('total', total.toFixed(2));
+}
+
+
+document.getElementById("agregarProducto").addEventListener("click", agregarProducto);
+document.getElementById("vaciarCarrito").addEventListener("click", vaciarCarrito);
+document.getElementById("buscar").addEventListener("click", buscarProducto);
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    actualizarCarrito();
+    actualizarTotal();
+});
+
+
+
+
 
 
 
